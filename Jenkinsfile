@@ -268,20 +268,52 @@ pipeline {
                 bat '''
                     if not exist monitoring-reports mkdir monitoring-reports
 
+                    echo Creating monitoring environment config...
+                    echo IMAGE_NAME=%IMAGE_NAME% > monitoring-reports\\monitoring.env
+                    echo STAGING_IMAGE_TAG=%BUILD_NUMBER% >> monitoring-reports\\monitoring.env
+                    echo PROD_IMAGE_TAG=release-%BUILD_NUMBER% >> monitoring-reports\\monitoring.env
+                    echo STAGING_API_KEY=staging-api-key >> monitoring-reports\\monitoring.env
+                    echo PROD_API_KEY=production-api-key >> monitoring-reports\\monitoring.env
+
                     echo Starting Prometheus monitoring service...
-                    docker compose --env-file release\\production.env up -d prometheus
+                    docker compose --env-file monitoring-reports\\monitoring.env up -d prometheus
+
+                    if errorlevel 1 (
+                        echo Failed to start Prometheus.
+                        exit /b 1
+                    )
 
                     echo Waiting for Prometheus to start...
                     powershell -Command "Start-Sleep -Seconds 15"
 
+                    echo Checking Prometheus container status...
+                    docker ps -a | findstr sit753-prometheus
+
                     echo Checking Prometheus health...
                     powershell -Command "$r = Invoke-WebRequest -UseBasicParsing http://localhost:9090/-/healthy; if ($r.StatusCode -ne 200) { exit 1 }"
+
+                    if errorlevel 1 (
+                        echo Prometheus health check failed.
+                        docker logs sit753-prometheus > monitoring-reports\\prometheus-container-logs.txt
+                        exit /b 1
+                    )
 
                     echo Checking production metrics endpoint...
                     powershell -Command "$r = Invoke-WebRequest -UseBasicParsing http://localhost:8082/metrics; if ($r.StatusCode -ne 200) { exit 1 }"
 
+                    if errorlevel 1 (
+                        echo Production metrics endpoint check failed.
+                        exit /b 1
+                    )
+
                     echo Querying live metrics status from Prometheus...
                     powershell -Command "Invoke-WebRequest -UseBasicParsing 'http://localhost:9090/api/v1/query?query=up' | Select-Object -ExpandProperty Content" > monitoring-reports\\prometheus-up-query.json
+
+                    if errorlevel 1 (
+                        echo Failed to query Prometheus live metrics.
+                        docker logs sit753-prometheus > monitoring-reports\\prometheus-container-logs.txt
+                        exit /b 1
+                    )
 
                     echo Simulating incident by stopping staging container...
                     docker stop sit753-student-platform-staging
@@ -292,8 +324,18 @@ pipeline {
                     echo Querying Prometheus alerts after incident simulation...
                     powershell -Command "Invoke-WebRequest -UseBasicParsing 'http://localhost:9090/api/v1/alerts' | Select-Object -ExpandProperty Content" > monitoring-reports\\prometheus-alerts.json
 
+                    if errorlevel 1 (
+                        echo Failed to query Prometheus alerts.
+                        docker logs sit753-prometheus > monitoring-reports\\prometheus-container-logs.txt
+
+                        echo Restarting staging container before failing...
+                        docker compose --env-file monitoring-reports\\monitoring.env up -d student-platform-staging
+
+                        exit /b 1
+                    )
+
                     echo Restarting staging container after incident simulation...
-                    docker compose --env-file deployment\\staging-current.env up -d student-platform-staging
+                    docker compose --env-file monitoring-reports\\monitoring.env up -d student-platform-staging
 
                     echo Monitoring Stage completed successfully.
                 '''
