@@ -37,18 +37,18 @@ services:
       retries: 3
     restart: unless-stopped
 
-    prometheus:
-      image: prom/prometheus:v2.52.0
-      container_name: sit753-prometheus
-      ports:
-        - "9090:9090"
-      volumes:
-        - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-        - ./monitoring/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
-      depends_on:
-        - student-platform-staging
-        - student-platform-prod
-      restart: unless-stopped
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    container_name: sit753-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+    depends_on:
+      - student-platform-staging
+      - student-platform-prod
+    restart: unless-stopped
 volumes:
   staging_data:
   staging_logs:
