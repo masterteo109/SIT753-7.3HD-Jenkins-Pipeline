@@ -28,7 +28,7 @@
 npm install
 ```
 
-## Run locally
+## Run Locally
 
 Create a `.env` file from `.env.example`, or just run with defaults:
 
