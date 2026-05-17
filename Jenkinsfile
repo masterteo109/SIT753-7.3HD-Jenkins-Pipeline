@@ -31,22 +31,6 @@ pipeline {
                 echo 'Integration Tests completed successfully.'
             }
         }
-        stage('Code Quality') {
-            steps {
-                echo 'Starting Code Quality Stage...'
-
-                bat '''
-                    echo Running SonarQube/SonarCloud scan...
-
-                    npx sonar-scanner ^
-                    -Dsonar.host.url=https://sonarcloud.io ^
-                    -Dsonar.token=%SONAR_TOKEN% ^
-                    -Dsonar.qualitygate.wait=true
-                '''
-
-                echo 'Code Quality Stage completed successfully.'
-            }
-        }
 
         stage('Code Quality') {
             steps {
