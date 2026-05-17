@@ -1,0 +1,10 @@
+node_modules
+coverage
+.git
+.gitignore
+README.md
+junit.xml
+logs
+data/*.json
+*.log
+.env
