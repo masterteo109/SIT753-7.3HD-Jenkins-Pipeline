@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = 'sit753-student-platform'
+        IMAGE_NAME = 'masterteo/sit753-student-platform'
         SONAR_TOKEN = credentials('SONAR_TOKEN')
     }
 
