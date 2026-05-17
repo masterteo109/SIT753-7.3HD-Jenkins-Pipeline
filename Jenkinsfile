@@ -270,7 +270,9 @@ pipeline {
 
                     echo Creating monitoring environment config...
                     echo IMAGE_NAME=%IMAGE_NAME% > monitoring-reports\\monitoring.env
+                    echo STAGING_IMAGE_TAG=%BUILD_NUMBER% >> monitoring-reports\\monitoring.env
                     echo PROD_IMAGE_TAG=release-%BUILD_NUMBER% >> monitoring-reports\\monitoring.env
+                    echo STAGING_API_KEY=staging-api-key >> monitoring-reports\\monitoring.env
                     echo PROD_API_KEY=production-api-key >> monitoring-reports\\monitoring.env
 
                     echo Starting Prometheus monitoring service...
