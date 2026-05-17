@@ -25,6 +25,10 @@ app.use(express.json({ limit: "1mb" }));
 app.use(requestId);
 app.use(metricsMiddleware);
 
+app.get("/", (req, res) => {
+  res.redirect("/view");
+});
+
 app.use(
   rateLimit({
     windowMs: config.rateLimitWindowMs,
