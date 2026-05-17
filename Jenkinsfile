@@ -302,7 +302,7 @@ pipeline {
                     if errorlevel 1 (
                         echo Production metrics endpoint check failed.
                         exit /b 1
-                    )g
+                    )
 
                     echo Querying live metrics status from Prometheus...
                     powershell -Command "Invoke-WebRequest -UseBasicParsing 'http://localhost:9090/api/v1/query?query=up' | Select-Object -ExpandProperty Content" > monitoring-reports\\prometheus-up-query.json
