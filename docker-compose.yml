@@ -1,19 +1,16 @@
 services:
-  student-platform:
-    build: .
-    image: sit753-student-platform:latest
-    container_name: sit753-student-platform
+  student-platform-staging:
+    image: ${IMAGE_NAME}:${STAGING_IMAGE_TAG}
+    container_name: sit753-student-platform-staging
     ports:
       - "8081:3000"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=staging
       - PORT=3000
-      - API_KEY=change-this-api-key
-      - DATA_FILE=/app/data/students-db.json
-      - LOG_LEVEL=info
+      - API_KEY=${STAGING_API_KEY}
     volumes:
-      - student_data:/app/data
-      - student_logs:/app/logs
+      - staging_data:/app/data
+      - staging_logs:/app/logs
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/health/ready"]
       interval: 15s
@@ -21,17 +18,39 @@ services:
       retries: 3
     restart: unless-stopped
 
-  prometheus:
-    image: prom/prometheus:v2.52.0
-    container_name: sit753-prometheus
+  student-platform-prod:
+    image: ${IMAGE_NAME}:${PROD_IMAGE_TAG}
+    container_name: sit753-student-platform-prod
     ports:
-      - "9090:9090"
+      - "8082:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - API_KEY=${PROD_API_KEY}
     volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    depends_on:
-      - student-platform
+      - prod_data:/app/data
+      - prod_logs:/app/logs
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
     restart: unless-stopped
 
+    prometheus:
+      image: prom/prometheus:v2.52.0
+      container_name: sit753-prometheus
+      ports:
+        - "9090:9090"
+      volumes:
+        - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+        - ./monitoring/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      depends_on:
+        - student-platform-staging
+        - student-platform-prod
+      restart: unless-stopped
 volumes:
-  student_data:
-  student_logs:
+  staging_data:
+  staging_logs:
+  prod_data:
+  prod_logs:

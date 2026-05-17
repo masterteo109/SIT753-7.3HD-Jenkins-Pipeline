@@ -1,8 +1,17 @@
 global:
   scrape_interval: 5s
+  evaluation_interval: 5s
+
+rule_files:
+  - /etc/prometheus/alert_rules.yml
 
 scrape_configs:
-  - job_name: "student-platform"
+  - job_name: "student-platform-staging"
     metrics_path: "/metrics"
     static_configs:
-      - targets: ["student-platform:3000"]
+      - targets: ["student-platform-staging:3000"]
+
+  - job_name: "student-platform-production"
+    metrics_path: "/metrics"
+    static_configs:
+      - targets: ["student-platform-prod:3000"]

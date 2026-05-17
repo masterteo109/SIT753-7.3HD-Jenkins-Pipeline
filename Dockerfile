@@ -8,11 +8,11 @@ RUN npm install --omit=dev
 
 COPY src ./src
 
-RUN mkdir -p data logs
+RUN npm run build
 
 ENV NODE_ENV=production
-ENV PORT=3000
-ENV DATA_FILE=/app/data/students-db.json
+
+RUN mkdir -p data logs
 
 EXPOSE 3000
 

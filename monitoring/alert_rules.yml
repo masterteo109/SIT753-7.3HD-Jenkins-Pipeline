@@ -1,0 +1,22 @@
+groups:
+  - name: student-platform-alerts
+    rules:
+      - alert: AppDownStaging
+        expr: up{job="student-platform-staging"} == 0
+        for: 0s
+        labels:
+          severity: critical
+          environment: staging
+        annotations:
+          summary: "Staging application is down"
+          description: "Prometheus cannot scrape the staging application metrics."
+
+      - alert: AppDownProduction
+        expr: up{job="student-platform-production"} == 0
+        for: 0s
+        labels:
+          severity: critical
+          environment: production
+        annotations:
+          summary: "Production application is down"
+          description: "Prometheus cannot scrape the production application metrics."
