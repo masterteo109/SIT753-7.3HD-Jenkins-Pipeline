@@ -270,9 +270,7 @@ pipeline {
 
                     echo Creating monitoring environment config...
                     echo IMAGE_NAME=%IMAGE_NAME% > monitoring-reports\\monitoring.env
-                    echo STAGING_IMAGE_TAG=%BUILD_NUMBER% >> monitoring-reports\\monitoring.env
                     echo PROD_IMAGE_TAG=release-%BUILD_NUMBER% >> monitoring-reports\\monitoring.env
-                    echo STAGING_API_KEY=staging-api-key >> monitoring-reports\\monitoring.env
                     echo PROD_API_KEY=production-api-key >> monitoring-reports\\monitoring.env
 
                     echo Starting Prometheus monitoring service...
@@ -304,7 +302,7 @@ pipeline {
                     if errorlevel 1 (
                         echo Production metrics endpoint check failed.
                         exit /b 1
-                    )
+                    )g
 
                     echo Querying live metrics status from Prometheus...
                     powershell -Command "Invoke-WebRequest -UseBasicParsing 'http://localhost:9090/api/v1/query?query=up' | Select-Object -ExpandProperty Content" > monitoring-reports\\prometheus-up-query.json
