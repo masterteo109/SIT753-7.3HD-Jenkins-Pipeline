@@ -128,7 +128,7 @@ pipeline {
                     echo Trivy report placeholder created. > security-reports\\trivy-image-report.txt
 
                     echo Running npm audit for dependency vulnerabilities...
-                    npm audit --audit-level=critical --json > security-reports\\npm-audit-report.json
+                    call npm audit --audit-level=critical --json > security-reports\\npm-audit-report.json
 
                     if errorlevel 1 (
                         echo Critical dependency vulnerabilities found.
