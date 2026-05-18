@@ -39,7 +39,10 @@ pipeline {
                 bat '''
                     echo Generating coverage report...
                     npx jest --coverage --coverageReporters=lcov --coverageReporters=text --runInBand --ci
+                '''
 
+                bat '''
+                    echo Checking coverage file...
                     if not exist coverage\\lcov.info (
                         echo coverage\\lcov.info was not generated.
                         exit /b 1
@@ -47,13 +50,18 @@ pipeline {
 
                     echo Coverage file generated successfully.
                     dir coverage
+                '''
 
+                bat '''
+                    echo Preparing Sonar Scanner...
                     if not exist sonar-scanner (
                         curl -L -o sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-6.2.1.4610-windows-x64.zip
                         powershell -Command "Expand-Archive -Path sonar-scanner.zip -DestinationPath . -Force"
                         ren sonar-scanner-6.2.1.4610-windows-x64 sonar-scanner
                     )
+                '''
 
+                bat '''
                     echo Running SonarCloud analysis...
                     sonar-scanner\\bin\\sonar-scanner.bat -Dsonar.token=%SONAR_TOKEN%
                 '''
