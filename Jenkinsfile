@@ -38,7 +38,15 @@ pipeline {
 
                 bat '''
                     echo Generating coverage report...
-                    npx jest --coverage --coverageReporters=lcov --runInBand --ci
+                    npx jest --coverage --coverageReporters=lcov --coverageReporters=text --runInBand --ci
+
+                    if not exist coverage\\lcov.info (
+                        echo coverage\\lcov.info was not generated.
+                        exit /b 1
+                    )
+
+                    echo Coverage file generated successfully.
+                    dir coverage
 
                     if not exist sonar-scanner (
                         curl -L -o sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-6.2.1.4610-windows-x64.zip
@@ -46,7 +54,8 @@ pipeline {
                         ren sonar-scanner-6.2.1.4610-windows-x64 sonar-scanner
                     )
 
-                    sonar-scanner\\bin\\sonar-scanner.bat 
+                    echo Running SonarCloud analysis...
+                    sonar-scanner\\bin\\sonar-scanner.bat -Dsonar.token=%SONAR_TOKEN%
                 '''
 
                 echo 'Code Quality Stage completed successfully.'
