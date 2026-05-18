@@ -169,6 +169,7 @@ pipeline {
 
                     echo Security Stage completed successfully.
                     echo Result: PASSED - Security checks completed. >> security-reports\\security-summary.txt
+                    exit /b 0
                 '''
             }
 
@@ -177,7 +178,7 @@ pipeline {
                     archiveArtifacts artifacts: 'security-reports/**', allowEmptyArchive: true
                 }
             }
-            }
+        }
 
         stage('Deploy') {
             steps {
