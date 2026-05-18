@@ -1,12 +1,18 @@
-const path = require("path");
+const path = require("node:path");
 require("dotenv").config();
 
 const nodeEnv = process.env.NODE_ENV || "development";
+
+const corsOrigins = (process.env.CORS_ORIGIN || "http://localhost:8081,http://localhost:8082")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 const config = {
   nodeEnv,
   port: Number(process.env.PORT || 3000),
   apiKey: process.env.API_KEY || "dev-api-key",
+  corsOrigins,
   dataFile:
     process.env.DATA_FILE ||
     path.join(process.cwd(), "data", nodeEnv === "test" ? "test-db.json" : "students-db.json"),

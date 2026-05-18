@@ -1,5 +1,5 @@
-const fs = require("fs");
-const path = require("path");
+const fs = require("node:fs");
+const path = require("node:path");
 const config = require("../config");
 const createDefaultData = require("./defaultData");
 
@@ -29,7 +29,7 @@ function writeDb(data) {
   const nextData = {
     ...data,
     metadata: {
-      ...(data.metadata || {}),
+      ...data.metadata,
       updatedAt: new Date().toISOString()
     }
   };

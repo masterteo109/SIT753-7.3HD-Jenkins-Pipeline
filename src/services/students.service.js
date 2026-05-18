@@ -25,7 +25,7 @@ function createStudent(input) {
 
   const course = coursesRepository.findByCode(input.courseCode);
 
-  if (!course || !course.active) {
+  if (!course?.active) {
     throw new AppError("Course does not exist or is inactive", 400);
   }
 
@@ -48,7 +48,7 @@ function updateStudent(id, input) {
 
   if (input.courseCode) {
     const course = coursesRepository.findByCode(input.courseCode);
-    if (!course || !course.active) {
+    if (!course?.active) {
       throw new AppError("Course does not exist or is inactive", 400);
     }
   }

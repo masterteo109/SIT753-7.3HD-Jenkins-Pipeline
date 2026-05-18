@@ -1,4 +1,4 @@
-const fs = require("fs");
+const fs = require("node:fs");
 const config = require("../config");
 const { readDb } = require("../data/database");
 

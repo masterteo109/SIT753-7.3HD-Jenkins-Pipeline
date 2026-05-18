@@ -24,7 +24,7 @@ function create(courseInput) {
     code: String(courseInput.code).toUpperCase(),
     title: courseInput.title,
     level: courseInput.level,
-    active: courseInput.active !== undefined ? courseInput.active : true,
+    active: courseInput.active ?? true,
     createdAt: now,
     updatedAt: now
   };
@@ -39,19 +39,21 @@ function update(code, updateInput) {
   const db = readDb();
   const course = db.courses.find((item) => item.code === String(code).toUpperCase());
 
-  if (!course) {
-    return null;
+  if (course) {
+    course.title = updateInput.title || course.title;
+    course.level = updateInput.level || course.level;
+
+    if (Object.hasOwn(updateInput, "active")) {
+      course.active = updateInput.active;
+    }
+
+    course.updatedAt = new Date().toISOString();
+
+    writeDb(db);
+    return course;
   }
 
-  course.title = updateInput.title || course.title;
-  course.level = updateInput.level || course.level;
-  if (updateInput.active !== undefined) {
-    course.active = updateInput.active;
-  }
-  course.updatedAt = new Date().toISOString();
-
-  writeDb(db);
-  return course;
+  return null;
 }
 
 module.exports = {
