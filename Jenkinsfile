@@ -125,10 +125,12 @@ pipeline {
                     echo CRITICAL vulnerabilities will fail the pipeline. >> security-reports\\security-summary.txt
                     echo HIGH vulnerabilities are recorded for review and mitigation. >> security-reports\\security-summary.txt
 
+                    echo Trivy report placeholder created. > security-reports\\trivy-image-report.txt
+
                     echo Running npm audit for dependency vulnerabilities...
                     npm audit --audit-level=critical --json > security-reports\\npm-audit-report.json
 
-                    if %ERRORLEVEL% NEQ 0 (
+                    if errorlevel 1 (
                         echo Critical dependency vulnerabilities found.
                         echo Result: FAILED - Critical dependency vulnerability found. >> security-reports\\security-summary.txt
                         echo Mitigation: Update or replace vulnerable npm packages before deployment. >> security-reports\\security-summary.txt
@@ -138,9 +140,14 @@ pipeline {
                     echo npm audit completed successfully. >> security-reports\\security-summary.txt
 
                     echo Checking Trivy installation...
-                    where trivy
+                    where trivy >nul 2>nul
 
-                    if %ERRORLEVEL% EQU 0 (
+                    if errorlevel 1 (
+                        echo Trivy is not installed on this Jenkins machine.
+                        echo Trivy is not installed on this Jenkins machine. > security-reports\\trivy-image-report.txt
+                        echo Container image scan was not completed because Trivy is missing. >> security-reports\\security-summary.txt
+                        echo Mitigation: Install Trivy on the Jenkins machine and rerun the pipeline. >> security-reports\\security-summary.txt
+                    ) else (
                         echo Running Trivy scan on Docker image...
                         trivy image --severity HIGH,CRITICAL --format table -o security-reports\\trivy-image-report.txt %IMAGE_NAME%:%BUILD_NUMBER%
 
@@ -150,7 +157,7 @@ pipeline {
                         echo Applying Trivy security gate for CRITICAL vulnerabilities...
                         trivy image --severity CRITICAL --exit-code 1 %IMAGE_NAME%:%BUILD_NUMBER%
 
-                        if %ERRORLEVEL% NEQ 0 (
+                        if errorlevel 1 (
                             echo Critical container image vulnerabilities found.
                             echo Result: FAILED - Critical Docker image vulnerability found. >> security-reports\\security-summary.txt
                             echo Mitigation: Rebuild the image using a patched base image or updated dependencies. >> security-reports\\security-summary.txt
@@ -158,11 +165,6 @@ pipeline {
                         )
 
                         echo No critical Docker image vulnerabilities found. >> security-reports\\security-summary.txt
-                    ) else (
-                        echo Trivy is not installed on this Jenkins machine.
-                        echo Trivy is not installed. > security-reports\\trivy-image-report.txt
-                        echo Container image scan was not completed because Trivy is missing. >> security-reports\\security-summary.txt
-                        echo Mitigation: Install Trivy on the Jenkins machine and rerun the pipeline. >> security-reports\\security-summary.txt
                     )
 
                     echo Security Stage completed successfully.
@@ -175,7 +177,7 @@ pipeline {
                     archiveArtifacts artifacts: 'security-reports/**', allowEmptyArchive: true
                 }
             }
-        }
+            }
 
         stage('Deploy') {
             steps {
